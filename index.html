@@ -103,7 +103,8 @@ body{margin:0;-webkit-text-size-adjust:100%}
   <div class="switch">
     <span class="switch-label">デザイン</span>
     <div class="tabs" role="group" aria-label="デザインを選ぶ">
-      <button class="tab" id="tab-garden" aria-pressed="true">Garden</button>
+      <button class="tab" id="tab-heart" aria-pressed="true">Heart</button>
+      <button class="tab" id="tab-garden" aria-pressed="false">Garden</button>
       <button class="tab" id="tab-film" aria-pressed="false">Film</button>
     </div>
   </div>
@@ -154,16 +155,18 @@ const CONFIG = {
 
 // ===== スミレさんのPNGテンプレート（写真部分を透明にしたもの） =====
 // ここに画像（data URI）が入ると、仮デザインの代わりにそれが使われます。
+// 透明部分の下に写真が敷かれます。用意したサイズだけ選べるようになります。
 const TEMPLATES = {
-  garden: { post: null, story: null },
-  film:   { post: null, story: null }
+  heart: { story: "heart_story.png" }
 };
 // ==================================================================
 
 const SIZES = { post: { w: 1080, h: 1350 }, story: { w: 1080, h: 1920 } };
 const cv = document.getElementById("preview");
 const ctx = cv.getContext("2d");
-let design = "garden", size = "post";
+let design = "heart", size = "story";
+const DESIGN_IDS = ["heart", "garden", "film"];
+const sizesFor = d => TEMPLATES[d] ? Object.keys(TEMPLATES[d]) : ["post", "story"];
 let W = 1080, H = 1350;
 let photo = null;
 let zoom = 1, panX = 0, panY = 0;
@@ -294,13 +297,18 @@ function drawPhoto(c, s) {
 
 function render(c = ctx) {
   c.clearRect(0, 0, W, H);
-  const tpl = templateImgs[design + "_" + size];
-  if (tpl) {
+  if (TEMPLATES[design]) {
     // user's PNG: photo fills the whole canvas underneath, PNG on top
+    const tpl = templateImgs[design + "_" + size];
     const full = { x: 0, y: 0, w: W, h: H };
     if (photo) drawPhoto(c, full);
-    else { c.fillStyle = "#D8D8D3"; c.fillRect(0, 0, W, H); }
-    c.drawImage(tpl, 0, 0, W, H);
+    else {
+      c.fillStyle = "#3A3A3A"; c.fillRect(0, 0, W, H);
+      c.fillStyle = "#FFFFFF"; c.textAlign = "center";
+      c.font = '700 44px "Zen Old Mincho"';
+      c.fillText("ここに写真が入ります", W / 2, H * 0.3);
+    }
+    if (tpl) c.drawImage(tpl, 0, 0, W, H);
     return;
   }
   const d = DESIGNS[design], s = d.slots[size];
