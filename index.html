@@ -147,6 +147,8 @@ const DESIGNS = [
   { file: "heart",   label: "Heart" },
   { file: "design4", label: "Design 4" }   // 名前が決まったら label を変えてください
 ];
+// 画像を差し替えたら、この数字を1つ増やしてください（古い画像が表示されるのを防ぎます）
+const FRAME_VERSION = 2;
 // ==================================================
 
 const SIZES = {
@@ -182,7 +184,7 @@ function loadViaImg(src) {
 // tries heart_01.png, Heart_01.png, HEART_01.png (GitHub Pages is case-sensitive)
 async function loadFrame(file, suffix) {
   const cap = file.charAt(0).toUpperCase() + file.slice(1);
-  const names = [file, cap, file.toUpperCase()].map(n => n + suffix + ".png");
+  const names = [file, cap, file.toUpperCase()].map(n => n + suffix + ".png?v=" + FRAME_VERSION);
   if (file === "heart" && suffix === "_02") names.push("heart_story.png");
   for (const n of names) {
     try { return await loadViaImg(n); } catch {}
