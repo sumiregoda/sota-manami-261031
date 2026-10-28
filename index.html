@@ -3,138 +3,307 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#F2F0EB">
-<title>Wedding Photo Frame</title>
+<meta name="theme-color" content="#FFFFF8">
+<title>Sota &amp; Manami Photo Frame</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&family=Zen+Old+Mincho:wght@400;700&display=swap">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Arimo:wght@400;700&family=Gwendolyn:wght@400;700&family=Noto+Sans+JP:wght@400;500;700&display=swap">
 <style>
-*,*::before,*::after { box-sizing: border-box; }
-[hidden] { display: none !important; }
-/* Layout: one narrow column — design + size switches, live canvas preview, then the actions a guest needs. */
+/* Layout: intro overlay → full-screen message on cream → full-screen mint photo booth that fits one phone screen. */
 :root {
-  --bg: #F2F0EB;
-  --surface: #FBFAF7;
-  --fg: #2B2E2A;
-  --muted: #6E726A;
-  --line: #D9D6CD;
-  --accent: #5E7458;
-  --accent-fg: #FFFFFF;
-  --font-display: "Cormorant Garamond", "Times New Roman", serif;
-  --font-body: "Zen Old Mincho", "Hiragino Mincho ProN", "Yu Mincho", serif;
-  padding-top: env(safe-area-inset-top, 0px);
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+  --bg: #FFFFF8;
+  --ink: #604D3F;
+  --mint: #CBE4B9;
+  --mint-soft: #E3F0D8;
+  --mint-70: #DBECCC; /* mint at 70% over the cream background */
+  --white: #FFFFFF;
+  --en: "Arimo", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --jp: "Noto Sans JP", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+  --script: "Gwendolyn", "Snell Roundhand", cursive;
+  color-scheme: light;
 }
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #1B1D1A; --surface: #242722; --fg: #ECEAE3; --muted: #A3A69C;
-    --line: #3A3E37; --accent: #9DB592; --accent-fg: #172015; color-scheme: dark;
-  }
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+html, body { margin: 0; background: var(--bg); color: var(--ink); }
+body { font-family: var(--en), var(--jp); font-family: "Arimo", "Noto Sans JP", "Helvetica Neue", Helvetica, Arial, "Hiragino Sans", sans-serif; }
+button { font: inherit; color: inherit; }
+.gutter {
+  padding-left: max(20px, env(safe-area-inset-left, 0px));
+  padding-right: max(20px, env(safe-area-inset-right, 0px));
 }
-html, body { background: var(--bg); color: var(--fg); }
-body {
-  margin: 0;
-  -webkit-text-size-adjust: 100%;
-  font-family: var(--font-body);
-  padding-left: max(16px, env(safe-area-inset-left, 0px));
-  padding-right: max(16px, env(safe-area-inset-right, 0px));
-  padding-block: 24px 40px;
-}
-.wrap { max-width: 460px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
-header { text-align: center; display: flex; flex-direction: column; gap: 4px; margin-bottom: 4px; }
-.eyebrow { font-family: var(--font-display); font-style: italic; font-size: 15px; color: var(--muted); letter-spacing: .06em; }
-h1 { margin: 0; font-size: 21px; font-weight: 700; letter-spacing: .06em; text-wrap: balance; }
-.lead { margin: 0; font-size: 13px; color: var(--muted); line-height: 1.7; }
 
-.switch { display: flex; flex-direction: column; gap: 6px; }
-.switch-label { font-size: 11px; letter-spacing: .12em; color: var(--muted); }
-.tabs { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 8px; }
-.tab {
-  font: inherit; font-size: 14px; padding: 10px 6px; border-radius: 999px;
-  border: 1px solid var(--line); background: var(--surface); color: var(--fg); cursor: pointer;
-  display: flex; align-items: center; justify-content: center; gap: 6px; min-width: 0;
+/* ---------- ① Intro ---------- */
+#intro {
+  position: fixed; inset: 0; z-index: 50; background: var(--bg);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; gap: 6px; cursor: pointer;
+  transition: opacity 1s ease, visibility 1s;
 }
-.tab small { font-family: var(--font-display); font-size: 13px; color: var(--muted); }
-.tab[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); font-weight: 700; }
-.tab[aria-pressed="true"] small { color: var(--accent); }
-.tab:disabled { opacity: .35; cursor: default; }
+#intro.out { opacity: 0; visibility: hidden; }
+#intro .names { font-size: 15px; letter-spacing: .18em; margin-bottom: 4px; }
+#intro .welcome { font-family: var(--script); font-size: clamp(64px, 19vw, 96px); line-height: .95; font-weight: 400; }
+#intro .welcome span { display: block; }
+#intro .date { font-size: 15px; letter-spacing: .24em; margin-top: 14px; }
+#intro .fade { opacity: 0; transform: translateY(8px); animation: rise 1.1s ease forwards; }
+#intro .d1 { animation-delay: .2s; } #intro .d2 { animation-delay: .6s; }
+#intro .d3 { animation-delay: 1.0s; } #intro .d4 { animation-delay: 1.5s; }
+@keyframes rise { to { opacity: 1; transform: none; } }
 
-.stage { display: flex; flex-direction: column; align-items: center; margin-top: 6px; }
+/* ---------- ② Message ---------- */
+#message {
+  position: relative; overflow: hidden;
+  min-height: 100vh; min-height: 100svh;
+  display: flex; flex-direction: column; justify-content: center;
+  padding-block: calc(64px + env(safe-area-inset-top, 0px)) calc(110px + env(safe-area-inset-bottom, 0px));
+}
+.msg { position: relative; max-width: 460px; margin: 0 auto; width: 100%; }
+.title { position: relative; margin: 0 0 28px; }
+.watermark {
+  position: absolute; left: -10px; bottom: -14px; pointer-events: none; z-index: 0;
+  font-family: var(--script); color: var(--mint); opacity: .5;
+  font-size: clamp(84px, 25vw, 124px); line-height: .58;
+  display: flex; flex-direction: column; white-space: nowrap;
+}
+.watermark span:nth-child(2) { padding-left: 12vw; }
+.watermark span:nth-child(3) { padding-left: 5vw; }
+.msg h1 {
+  position: relative; z-index: 1;
+  margin: 0; font-family: var(--jp); font-weight: 500;
+  font-size: clamp(25px, 7.4vw, 32px); letter-spacing: .1em; line-height: 1.5; text-wrap: balance;
+}
+.msg p {
+  margin: 0; font-family: var(--jp); font-size: 14px; line-height: 2.15; letter-spacing: .08em;
+  word-break: auto-phrase;
+}
+.msg p + p { margin-top: 18px; }
+.msg .sign { text-align: right; margin-top: 28px; font-size: 15px; letter-spacing: .12em; }
+.scroll {
+  position: absolute; left: 0; right: 0; z-index: 1;
+  bottom: calc(28px + env(safe-area-inset-bottom, 0px));
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  font-size: 12px; letter-spacing: .3em; text-decoration: none; color: var(--ink);
+}
+.scroll i { display: block; width: 1px; height: 46px; background: var(--ink); position: relative; overflow: hidden; }
+.scroll i::after {
+  content: ""; position: absolute; left: 0; top: -46px; width: 1px; height: 46px; background: var(--mint);
+  animation: drip 1.8s ease-in-out infinite;
+}
+@keyframes drip { to { top: 46px; } }
+
+/* ---------- ③ Photo booth ---------- */
+#app {
+  background: var(--mint-70);
+  height: 100vh; height: 100svh; min-height: 560px;
+  display: flex; flex-direction: column; gap: 12px;
+  padding-block: calc(14px + env(safe-area-inset-top, 0px)) calc(14px + env(safe-area-inset-bottom, 0px));
+}
+.app-inner { max-width: 460px; width: 100%; margin: 0 auto; height: 100%; display: flex; flex-direction: column; gap: 12px; }
+.topbar { display: flex; justify-content: space-between; align-items: center; }
+.topbar .brand { font-size: 12px; letter-spacing: .16em; }
+.link {
+  background: none; border: 0; padding: 6px 0; cursor: pointer;
+  font-size: 13px; letter-spacing: .06em; display: inline-flex; align-items: center; gap: 6px;
+}
+.link svg { width: 12px; height: 12px; }
+.group { display: flex; flex-direction: column; gap: 7px; }
+.label { display: flex; align-items: baseline; gap: 8px; }
+.label b { font-weight: 400; font-size: 20px; letter-spacing: .02em; }
+.label small { font-family: var(--jp); font-size: 10px; letter-spacing: .14em; }
+.pills { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 6px; }
+.pill {
+  border: 1px solid transparent; background: var(--white); border-radius: 999px; cursor: pointer;
+  padding: 9px 4px; font-size: 13px; letter-spacing: .03em; min-width: 0;
+  display: flex; align-items: center; justify-content: center; gap: 5px; white-space: nowrap;
+  transition: border-color .2s;
+}
+.pill small { font-size: 11px; opacity: .7; }
+.pill .jp { font-family: var(--jp); }
+.pill[aria-pressed="true"] { border-color: var(--ink); font-weight: 700; }
+.pill:disabled { opacity: .4; cursor: default; }
+
+.stage { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; }
+.frame { position: relative; line-height: 0; }
 canvas#preview {
-  display: block; max-width: 100%; height: auto;
-  width: min(100%, calc(66vh * var(--arw, .8)));
-  border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,.14);
-  touch-action: none; cursor: grab;
+  display: block; border-radius: 6px; background: #CFC8C0;
+  outline: 2px solid transparent; outline-offset: 3px; transition: outline-color .2s;
 }
-.hint { margin: 8px 0 0; text-align: center; font-size: 12px; color: var(--muted); min-height: 1.4em; }
-
-.zoom { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--muted); }
-.zoom input { flex: 1; accent-color: var(--accent); }
+.frame.adjusting canvas#preview { outline-color: var(--ink); touch-action: none; cursor: grab; }
+.adjust {
+  position: absolute; right: 8px; bottom: 8px;
+  border: 1px solid var(--ink); background: var(--white); border-radius: 999px;
+  padding: 7px 12px; font-family: var(--jp); font-size: 12px; line-height: 1; cursor: pointer;
+}
+.frame.adjusting .adjust { background: var(--ink); color: var(--bg); }
+.zoom {
+  position: absolute; left: 8px; bottom: 8px; right: 110px;
+  background: rgba(255,255,255,.92); border-radius: 999px; padding: 6px 12px;
+  display: flex; align-items: center; gap: 8px; line-height: 1; font-size: 11px;
+}
+.zoom input { flex: 1; min-width: 0; accent-color: var(--ink); }
+.empty-hint {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-family: var(--jp); font-size: 13px; letter-spacing: .1em; color: var(--white);
+  pointer-events: none; line-height: 1.6; text-align: center;
+}
 
 .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .btn {
-  font: inherit; font-size: 15px; padding: 14px 10px; border-radius: 10px; cursor: pointer;
-  border: 1px solid var(--line); background: var(--surface); color: var(--fg);
-  display: flex; align-items: center; justify-content: center; text-align: center;
+  border: 1px solid transparent; background: var(--white); border-radius: 999px; cursor: pointer;
+  padding: 13px 10px; font-family: var(--jp); font-size: 14px; letter-spacing: .06em;
 }
-.btn.primary { grid-column: 1 / -1; background: var(--accent); color: var(--accent-fg); border-color: var(--accent); font-weight: 700; }
+.save {
+  grid-column: 1 / -1; background: var(--ink); color: var(--bg);
+  display: flex; align-items: center; justify-content: space-between; padding: 15px 24px; font-weight: 500;
+}
+.save svg { width: 18px; height: 18px; }
 .btn:disabled { opacity: .45; cursor: default; }
-.btn:focus-visible, .tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.btn:focus-visible, .pill:focus-visible, .link:focus-visible, .adjust:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 input[type=file] { display: none; }
 
-.result { display: flex; flex-direction: column; gap: 8px; text-align: center; align-items: center; }
-.result img { width: min(100%, 360px); border-radius: 6px; }
-.result p { margin: 0; font-size: 13px; color: var(--muted); line-height: 1.6; }
-.toast { text-align: center; font-size: 13px; color: var(--accent); min-height: 1.4em; margin: 0; }
-footer { text-align: center; font-family: var(--font-display); font-style: italic; font-size: 14px; color: var(--muted); }
+/* ---------- Sheets (how to use / result) ---------- */
+.sheet {
+  position: fixed; inset: 0; z-index: 40; background: rgba(96,77,63,.35);
+  display: flex; align-items: center; justify-content: center;
+  padding: max(20px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(20px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+  animation: fadein .25s ease;
+}
+@keyframes fadein { from { opacity: 0; } }
+.card {
+  position: relative; width: 100%; max-width: 400px; max-height: 100%; overflow: auto;
+  background: var(--white); border-radius: 18px; padding: 26px 24px 28px;
+  background-image:
+    radial-gradient(120% 70% at 100% 100%, var(--mint-soft) 0%, rgba(227,240,216,0) 60%);
+}
+.close {
+  position: absolute; top: 14px; right: 14px; width: 36px; height: 36px; border-radius: 50%;
+  border: 1px solid var(--ink); background: var(--white); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.close svg { width: 12px; height: 12px; }
+.card h2 { margin: 0; font-weight: 400; font-size: 26px; }
+.card .sub { display: block; font-family: var(--jp); font-size: 11px; letter-spacing: .14em; margin: 4px 0 18px; }
+.steps { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--ink); }
+.steps li {
+  display: grid; grid-template-columns: 28px 1fr; gap: 6px; padding: 13px 0;
+  border-bottom: 1px solid rgba(96,77,63,.25); font-family: var(--jp); font-size: 14px; line-height: 1.7; letter-spacing: .05em;
+}
+.steps li span { font-family: var(--en); font-size: 15px; }
+.steps li small { display: block; font-size: 11px; opacity: .8; }
+.card .note { font-family: var(--jp); font-size: 12px; line-height: 1.9; margin: 16px 0 0; letter-spacing: .05em; }
+.result img { display: block; width: 100%; max-height: 62vh; object-fit: contain; border-radius: 6px; margin-top: 10px; }
+.result p { margin: 12px 0 0; text-align: center; font-family: var(--jp); font-size: 13px; letter-spacing: .06em; line-height: 1.8; }
+
+.toast {
+  position: fixed; left: 50%; transform: translateX(-50%); z-index: 45;
+  bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  background: var(--ink); color: var(--bg); border-radius: 999px; padding: 10px 18px;
+  font-family: var(--jp); font-size: 13px; white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #intro .fade { animation: none; opacity: 1; transform: none; }
+  .scroll i::after { animation: none; }
+}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <span class="eyebrow">SOTA &amp; MANAMI · 31 OCTOBER 2026</span>
-    <h1>フォトフレーム</h1>
-    <p class="lead">写真を撮るとフレームにはまります。保存してSNSに投稿してね。</p>
-  </header>
 
-  <div class="switch">
-    <span class="switch-label">デザイン</span>
-    <div class="tabs" id="designTabs" role="group" aria-label="デザインを選ぶ"></div>
-  </div>
+<!-- ① Intro -->
+<div id="intro" role="button" aria-label="タップしてはじめる" hidden>
+  <div class="names fade d1">Sota &amp; Manami</div>
+  <div class="welcome"><span class="fade d2">Welcome to</span><span class="fade d3">Our Wedding</span></div>
+  <div class="date fade d4">2026.10.31</div>
+</div>
 
-  <div class="switch">
-    <span class="switch-label">サイズ</span>
-    <div class="tabs" role="group" aria-label="サイズを選ぶ">
-      <button class="tab" id="size-post" aria-pressed="false">投稿 <small>4:5</small></button>
-      <button class="tab" id="size-story" aria-pressed="false">ストーリー <small>9:16</small></button>
+<!-- ② Message -->
+<section id="message" class="gutter">
+  <div class="msg">
+    <div class="title">
+      <div class="watermark" aria-hidden="true"><span>Original</span><span>Photo</span><span>Frame</span></div>
+      <h1>オリジナル<br>フォトフレーム</h1>
     </div>
+    <p>みなさんの目線で思い出を残してもらえたらと思い、オリジナルデザインのフォトフレームをご用意しました。</p>
+    <p>私たちが見られない瞬間を、たくさん撮っていただけると嬉しいです。</p>
+    <p>保存したお写真は、ぜひ二人にも送ってください。<br>本日はどうぞ、最後まで楽しんでお過ごしください。</p>
+    <p class="sign">― 小堀 颯太 &amp; 真奈美</p>
   </div>
+  <a class="scroll" href="#app">Scroll<i></i></a>
+</section>
 
-  <div class="stage">
-    <canvas id="preview" width="1080" height="1350" aria-label="フレームのプレビュー"></canvas>
-    <p class="hint" id="hint">フレームを読み込んでいます…</p>
-  </div>
+<!-- ③ Photo booth -->
+<section id="app" class="gutter">
+  <div class="app-inner">
+    <div class="topbar">
+      <span class="brand">SOTA &amp; MANAMI</span>
+      <button class="link" id="openHowto">
+        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><path d="M1 6h9M7 3l3 3-3 3"/></svg>
+        How to use
+      </button>
+    </div>
 
-  <label class="zoom" for="zoom" id="zoomRow" hidden>
-    <span>ズーム</span>
-    <input type="range" id="zoom" min="1" max="3" step="0.01" value="1">
-  </label>
+    <div class="group">
+      <div class="label"><b>Design</b><small>デザイン</small></div>
+      <div class="pills" id="designTabs" role="group" aria-label="デザインを選ぶ"></div>
+    </div>
 
-  <div class="actions">
-    <button class="btn" id="btnCamera">カメラで撮る</button>
-    <button class="btn" id="btnLibrary">写真を選ぶ</button>
-    <button class="btn primary" id="btnSave" disabled>この写真を保存</button>
+    <div class="group">
+      <div class="label"><b>Size</b><small>サイズ</small></div>
+      <div class="pills" role="group" aria-label="サイズを選ぶ">
+        <button class="pill" id="size-post" aria-pressed="false"><span class="jp">投稿</span><small>4:5</small></button>
+        <button class="pill" id="size-story" aria-pressed="false"><span class="jp">ストーリー</span><small>9:16</small></button>
+      </div>
+    </div>
+
+    <div class="stage" id="stage">
+      <div class="frame" id="frame">
+        <canvas id="preview" width="1080" height="1350" aria-label="フレームのプレビュー"></canvas>
+        <div class="empty-hint" id="emptyHint">フレームを読み込んでいます…</div>
+        <label class="zoom" id="zoomRow" for="zoom" hidden><span>ズーム</span><input type="range" id="zoom" min="1" max="3" step="0.01" value="1"></label>
+        <button class="adjust" id="btnAdjust" hidden>位置を調整</button>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn" id="btnCamera">カメラで撮る</button>
+      <button class="btn" id="btnLibrary">写真を選ぶ</button>
+      <button class="btn save" id="btnSave" disabled>
+        <span>この写真を保存</span>
+        <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="M2 9h13M11 5l4 4-4 4"/></svg>
+      </button>
+    </div>
   </div>
   <input type="file" id="fileCamera" accept="image/*" capture="environment">
   <input type="file" id="fileLibrary" accept="image/*">
-  <p class="toast" id="toast" role="status"></p>
+</section>
 
-  <div class="result" id="result" hidden>
-    <img id="resultImg" alt="フレーム付きの写真">
-    <p>画像を長押しして「写真に保存」できます</p>
+<!-- How to use -->
+<div class="sheet" id="howto" hidden role="dialog" aria-modal="true" aria-labelledby="howtoTitle">
+  <div class="card">
+    <button class="close" data-close aria-label="閉じる"><svg viewBox="0 0 12 12" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><path d="M1 1l10 10M11 1L1 11"/></svg></button>
+    <h2 id="howtoTitle">How to use</h2>
+    <span class="sub">つかいかた</span>
+    <ol class="steps">
+      <li><span>1.</span><div>フレームのデザインとサイズを選ぶ</div></li>
+      <li><span>2.</span><div>［カメラで撮る］または［写真を選ぶ］を押す</div></li>
+      <li><span>3.</span><div>［位置を調整］で写真の位置や大きさを整える<small>そのままでもOKです</small></div></li>
+      <li><span>4.</span><div>［この写真を保存］を押す<small>うまく保存できないときは、画像を長押しして保存</small></div></li>
+    </ol>
+    <p class="note">保存した写真は、どんどんSNSに投稿してください。あとで二人にも送ってもらえると嬉しいです。</p>
   </div>
-
-  <footer>Thank you for celebrating with us</footer>
 </div>
+
+<!-- Result -->
+<div class="sheet" id="resultSheet" hidden role="dialog" aria-modal="true" aria-label="できあがった写真">
+  <div class="card result">
+    <button class="close" data-close aria-label="閉じる"><svg viewBox="0 0 12 12" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><path d="M1 1l10 10M11 1L1 11"/></svg></button>
+    <h2>Your Photo</h2>
+    <img id="resultImg" alt="フレーム付きの写真">
+    <p>画像を長押しして「写真に保存」してください</p>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" hidden></div>
 
 <script>
 // ================= フレームの設定 =================
@@ -155,65 +324,87 @@ const SIZES = {
   post:  { w: 1080, h: 1350, suffix: "_01" },
   story: { w: 1080, h: 1920, suffix: "_02" }
 };
+const $ = id => document.getElementById(id);
+const cv = $("preview"), ctx = cv.getContext("2d");
+const frameEl = $("frame"), stage = $("stage");
+let design = null, size = "post", W = 1080, H = 1350;
+let photo = null, zoom = 1, panX = 0, panY = 0, adjusting = false;
+const frames = {};
 
-const cv = document.getElementById("preview");
-const ctx = cv.getContext("2d");
-const hint = document.getElementById("hint");
-const toast = document.getElementById("toast");
-let design = null, size = "post";
-let W = 1080, H = 1350;
-let photo = null;
-let zoom = 1, panX = 0, panY = 0;
-const frames = {};   // frames["heart"]["story"] = image
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch {} }
+};
 
-// ---------- Loading frames ----------
-function loadImage(src) {
-  if (src instanceof Blob && "createImageBitmap" in window) {
-    return createImageBitmap(src, { imageOrientation: "from-image" }).catch(() => loadViaImg(src));
+// ---------- ① Intro (first visit only) ----------
+(() => {
+  const intro = $("intro");
+  if (store.get("sm-visited")) {
+    requestAnimationFrame(() => $("app").scrollIntoView({ behavior: "instant", block: "start" }));
+    return;
   }
-  return loadViaImg(src);
+  intro.hidden = false;
+  document.documentElement.style.overflow = "hidden";
+  let done = false;
+  const finish = () => {
+    if (done) return; done = true;
+    intro.classList.add("out");
+    document.documentElement.style.overflow = "";
+    store.set("sm-visited", "1");
+    setTimeout(() => { intro.hidden = true; }, 1100);
+  };
+  intro.addEventListener("click", finish);
+  setTimeout(finish, 3600);
+})();
+
+// ---------- Fit preview into the space left on screen ----------
+function fitCanvas() {
+  const r = stage.getBoundingClientRect();
+  if (!r.width || !r.height) return;
+  const ar = W / H;
+  let w = r.width, h = w / ar;
+  if (h > r.height) { h = r.height; w = h * ar; }
+  cv.style.width = Math.floor(w) + "px";
+  cv.style.height = Math.floor(h) + "px";
 }
+new ResizeObserver(fitCanvas).observe(stage);
+
+// ---------- Frames ----------
 function loadViaImg(src) {
   return new Promise((res, rej) => {
     const img = new Image();
-    img.onload = () => res(img);
-    img.onerror = rej;
+    img.onload = () => res(img); img.onerror = rej;
     img.src = src instanceof Blob ? URL.createObjectURL(src) : src;
   });
 }
-// tries heart_01.png, Heart_01.png, HEART_01.png (GitHub Pages is case-sensitive)
+function loadPhoto(file) {
+  if ("createImageBitmap" in window) {
+    return createImageBitmap(file, { imageOrientation: "from-image" }).catch(() => loadViaImg(file));
+  }
+  return loadViaImg(file);
+}
 async function loadFrame(file, suffix) {
   const cap = file.charAt(0).toUpperCase() + file.slice(1);
   const names = [file, cap, file.toUpperCase()].map(n => n + suffix + ".png?v=" + FRAME_VERSION);
-  if (file === "heart" && suffix === "_02") names.push("heart_story.png");
-  for (const n of names) {
-    try { return await loadViaImg(n); } catch {}
-  }
+  if (file === "heart" && suffix === "_02") names.push("heart_story.png?v=" + FRAME_VERSION);
+  for (const n of names) { try { return await loadViaImg(n); } catch {} }
   return null;
 }
-
 const availableSizes = d => Object.keys(SIZES).filter(s => frames[d] && frames[d][s]);
 
 // ---------- Render ----------
 function drawPhoto(c) {
-  const pw = photo.width, ph = photo.height;
-  const sc = Math.max(W / pw, H / ph) * zoom;
-  const dw = pw * sc, dh = ph * sc;
+  const sc = Math.max(W / photo.width, H / photo.height) * zoom;
+  const dw = photo.width * sc, dh = photo.height * sc;
   const mx = Math.max(0, (dw - W) / 2), my = Math.max(0, (dh - H) / 2);
   panX = Math.min(mx, Math.max(-mx, panX));
   panY = Math.min(my, Math.max(-my, panY));
   c.drawImage(photo, (W - dw) / 2 + panX, (H - dh) / 2 + panY, dw, dh);
 }
-
 function render(c = ctx) {
   c.clearRect(0, 0, W, H);
   if (photo) drawPhoto(c);
-  else {
-    c.fillStyle = "#3A3A3A"; c.fillRect(0, 0, W, H);
-    c.fillStyle = "#FFFFFF"; c.textAlign = "center";
-    c.font = '700 44px "Zen Old Mincho", serif';
-    c.fillText("ここに写真が入ります", W / 2, H * 0.3);
-  }
+  else { c.fillStyle = "#B9B0A6"; c.fillRect(0, 0, W, H); }
   const f = design && frames[design] && frames[design][size];
   if (f) c.drawImage(f, 0, 0, W, H);
 }
@@ -221,58 +412,59 @@ function render(c = ctx) {
 // ---------- Switches ----------
 function setDesign(file) {
   design = file;
-  document.querySelectorAll("#designTabs .tab").forEach(b =>
-    b.setAttribute("aria-pressed", b.dataset.file === file));
+  document.querySelectorAll("#designTabs .pill").forEach(b => b.setAttribute("aria-pressed", b.dataset.file === file));
   const ok = availableSizes(file);
-  document.getElementById("size-post").disabled = !ok.includes("post");
-  document.getElementById("size-story").disabled = !ok.includes("story");
+  $("size-post").disabled = !ok.includes("post");
+  $("size-story").disabled = !ok.includes("story");
   applySize(ok.includes(size) ? size : ok[0]);
 }
 function applySize(name) {
   size = name;
-  ["post", "story"].forEach(s =>
-    document.getElementById("size-" + s).setAttribute("aria-pressed", s === name));
+  ["post", "story"].forEach(s => $("size-" + s).setAttribute("aria-pressed", s === name));
   W = SIZES[name].w; H = SIZES[name].h;
   cv.width = W; cv.height = H;
-  cv.style.setProperty("--arw", (W / H).toFixed(4));
-  panX = panY = 0; hideResult(); render();
+  panX = panY = 0; fitCanvas(); render();
 }
 ["post", "story"].forEach(s => {
-  document.getElementById("size-" + s).onclick = () => {
-    if (design && availableSizes(design).includes(s)) applySize(s);
-  };
+  $("size-" + s).onclick = () => { if (design && availableSizes(design).includes(s)) applySize(s); };
 });
 
 // ---------- Photo input ----------
-document.getElementById("btnCamera").onclick = () => document.getElementById("fileCamera").click();
-document.getElementById("btnLibrary").onclick = () => document.getElementById("fileLibrary").click();
+$("btnCamera").onclick = () => $("fileCamera").click();
+$("btnLibrary").onclick = () => $("fileLibrary").click();
 ["fileCamera", "fileLibrary"].forEach(id => {
-  document.getElementById(id).addEventListener("change", async e => {
+  $(id).addEventListener("change", async e => {
     const f = e.target.files && e.target.files[0];
     e.target.value = "";
     if (!f) return;
     try {
-      photo = await loadImage(f);
-      zoom = 1; panX = panY = 0;
-      document.getElementById("zoom").value = 1;
-      document.getElementById("zoomRow").hidden = false;
-      document.getElementById("btnSave").disabled = false;
-      hint.textContent = "ドラッグで位置、スライダーでズームを調整できます";
-      hideResult(); render();
+      photo = await loadPhoto(f);
+      zoom = 1; panX = panY = 0; $("zoom").value = 1;
+      $("emptyHint").hidden = true;
+      $("btnAdjust").hidden = false;
+      $("btnSave").disabled = false;
+      setAdjust(false); render();
     } catch {
-      hint.textContent = "写真を読み込めませんでした。別の写真で試してください";
+      showToast("写真を読み込めませんでした");
     }
   });
 });
 
-document.getElementById("zoom").addEventListener("input", e => { zoom = +e.target.value; hideResult(); render(); });
+// ---------- Adjust mode (B-1) ----------
+function setAdjust(on) {
+  adjusting = on;
+  frameEl.classList.toggle("adjusting", on);
+  $("btnAdjust").textContent = on ? "完了" : "位置を調整";
+  $("zoomRow").hidden = !on;
+}
+$("btnAdjust").onclick = () => setAdjust(!adjusting);
+$("zoom").addEventListener("input", e => { zoom = +e.target.value; render(); });
 
-// ---------- Drag / pinch ----------
 const pointers = new Map();
 let lastDist = 0;
-const toCanvas = dx => dx * (W / cv.getBoundingClientRect().width);
+const toCanvas = d => d * (W / cv.getBoundingClientRect().width);
 cv.addEventListener("pointerdown", e => {
-  if (!photo) return;
+  if (!adjusting || !photo) return;
   cv.setPointerCapture(e.pointerId);
   pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
 });
@@ -283,56 +475,55 @@ cv.addEventListener("pointermove", e => {
   if (pointers.size === 2) {
     const [a, b] = [...pointers.values()];
     const dist = Math.hypot(a.x - b.x, a.y - b.y);
-    if (lastDist) {
-      zoom = Math.min(3, Math.max(1, zoom * dist / lastDist));
-      document.getElementById("zoom").value = zoom;
-    }
+    if (lastDist) { zoom = Math.min(3, Math.max(1, zoom * dist / lastDist)); $("zoom").value = zoom; }
     lastDist = dist;
   } else {
     panX += toCanvas(e.clientX - prev.x);
     panY += toCanvas(e.clientY - prev.y);
   }
-  hideResult(); render();
+  render();
 });
-["pointerup", "pointercancel"].forEach(t => cv.addEventListener(t, e => {
-  pointers.delete(e.pointerId); lastDist = 0;
-}));
+["pointerup", "pointercancel"].forEach(t => cv.addEventListener(t, e => { pointers.delete(e.pointerId); lastDist = 0; }));
+
+// ---------- Sheets & toast ----------
+function openSheet(id) { $(id).hidden = false; }
+document.querySelectorAll(".sheet").forEach(s => {
+  s.addEventListener("click", e => { if (e.target === s || e.target.closest("[data-close]")) s.hidden = true; });
+});
+$("openHowto").onclick = () => openSheet("howto");
+let toastTimer;
+function showToast(t) {
+  const el = $("toast"); el.textContent = t; el.hidden = false;
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => { el.hidden = true; }, 2600);
+}
 
 // ---------- Save ----------
-function hideResult() { document.getElementById("result").hidden = true; toast.textContent = ""; }
-
-document.getElementById("btnSave").onclick = async () => {
+$("btnSave").onclick = async () => {
   if (!photo) return;
+  setAdjust(false);
   const out = document.createElement("canvas");
   out.width = W; out.height = H;
   render(out.getContext("2d"));
   const blob = await new Promise(r => out.toBlob(r, "image/jpeg", 0.92));
   const filename = "sota_manami_" + design + "_" + size + "_" + Date.now() + ".jpg";
   const file = new File([blob], filename, { type: "image/jpeg" });
+  const url = URL.createObjectURL(blob);
+  $("resultImg").src = url;
 
-  const img = document.getElementById("resultImg");
-  img.src = URL.createObjectURL(blob);
-  document.getElementById("result").hidden = false;
-
-  // phones: open the share sheet (画像を保存 / Instagram etc.)
   if (navigator.canShare && navigator.canShare({ files: [file] })) {
     try {
       await navigator.share({ files: [file] });
-      toast.textContent = "保存・共有できました";
+      showToast("保存・共有できました");
       return;
-    } catch (err) {
-      if (err && err.name === "AbortError") {
-        toast.textContent = "下の画像を長押しでも保存できます";
-        return;
-      }
-    }
+    } catch {}
+    openSheet("resultSheet");   // share cancelled or failed → long-press fallback
+    return;
   }
-  // PC etc.: download directly
+  // PC etc.
   const a = document.createElement("a");
-  a.href = img.src; a.download = filename;
+  a.href = url; a.download = filename;
   document.body.appendChild(a); a.click(); a.remove();
-  toast.textContent = "保存しました。うまくいかないときは下の画像を長押ししてください";
-  img.scrollIntoView({ behavior: "smooth", block: "center" });
+  openSheet("resultSheet");
 };
 
 // ---------- Boot ----------
@@ -340,24 +531,20 @@ applySize("post");
 (async () => {
   await Promise.all(DESIGNS.map(async d => {
     frames[d.file] = {};
-    await Promise.all(Object.keys(SIZES).map(async s => {
-      frames[d.file][s] = await loadFrame(d.file, SIZES[s].suffix);
-    }));
+    await Promise.all(Object.keys(SIZES).map(async s => { frames[d.file][s] = await loadFrame(d.file, SIZES[s].suffix); }));
   }));
-  const tabs = document.getElementById("designTabs");
   const ready = DESIGNS.filter(d => availableSizes(d.file).length);
   ready.forEach(d => {
     const b = document.createElement("button");
-    b.className = "tab"; b.dataset.file = d.file; b.textContent = d.label;
+    b.className = "pill"; b.dataset.file = d.file; b.textContent = d.label;
     b.setAttribute("aria-pressed", "false");
     b.onclick = () => setDesign(d.file);
-    tabs.appendChild(b);
+    $("designTabs").appendChild(b);
   });
-  if (!ready.length) { hint.textContent = "フレームが見つかりませんでした"; return; }
-  hint.textContent = "まずは下のボタンから写真を撮ってください";
+  if (!ready.length) { $("emptyHint").textContent = "フレームが見つかりませんでした"; return; }
+  $("emptyHint").innerHTML = "写真を撮るか選ぶと<br>ここに入ります";
   setDesign(ready[0].file);
 })();
-document.fonts && document.fonts.load('700 44px "Zen Old Mincho"').then(() => render()).catch(() => {});
 </script>
 </body>
 </html>
